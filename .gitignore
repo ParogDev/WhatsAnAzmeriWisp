@@ -1,3 +1,5 @@
 bin/
 obj/
 *.user
+.claude/override-path
+.claude/settings.local.json
