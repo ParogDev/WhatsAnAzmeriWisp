@@ -1,0 +1,4 @@
+[
+  { "Animal": "Owl", "Tier": "Primal", "StatName": "LightningDamagePctFromRage", "Display": "Empower" },
+  { "Animal": "*", "Tier": "*", "StatName": "LightningDamagePctFromRage", "Display": "Empower" }
+]
