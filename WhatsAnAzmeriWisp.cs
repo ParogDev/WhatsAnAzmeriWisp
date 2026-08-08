@@ -75,6 +75,7 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
 
     public override void EntityRemoved(Entity entity)
     {
+        if (entity == null) return;
         _tracked.Remove(entity.Id);
         _wispMemory.Remove(entity.Id);
         _carried.Remove(entity.Id);
@@ -84,7 +85,7 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
     {
         _canRender = false;
 
-        if (!GameController.InGame) return;
+        if (!Settings.Enable.Value || !GameController.InGame) return;
         var player = GameController.Player;
         if (player == null || !player.IsAlive) return;
 
@@ -98,6 +99,7 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
         }
 
         float maxDist = Settings.General.DrawDistance.Value;
+        if (!float.IsFinite(maxDist) || maxDist <= 0) return;
         _seen.Clear();
         _daemonsByCell.Clear();
 
@@ -111,7 +113,8 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
             {
                 var e = list[i];
                 if (e == null || !e.IsValid) continue;
-                if (e.DistancePlayer > maxDist) continue;
+                var distance = e.DistancePlayer;
+                if (!float.IsFinite(distance) || distance > maxDist) continue;
                 if (!WispClassifier.IsDaemon(e)) continue;
 
                 var info = WispClassifier.ClassifyDaemon(e, _empower);
@@ -133,7 +136,8 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
             {
                 var e = list[i];
                 if (e == null || !e.IsValid) continue;
-                if (e.DistancePlayer > maxDist) continue;
+                var distance = e.DistancePlayer;
+                if (!float.IsFinite(distance) || distance > maxDist) continue;
                 if (WispClassifier.IsDaemon(e)) continue;
                 if (!WispClassifier.IsRelevant(e)) continue;
 
@@ -219,6 +223,7 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
                 if (!HostMatchesAnimal(w, m.Animal)) continue;
 
                 float d = Vector2.Distance(m.GridPos, w.GridPos);
+                if (!float.IsFinite(d)) continue;
                 if (d <= bestDist)
                 {
                     bestDist = d;
@@ -345,7 +350,7 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
 
     public override void Render()
     {
-        if (!_canRender || !GameController.InGame) return;
+        if (!_canRender || !Settings.Enable.Value || !GameController.InGame) return;
 
         var ingameUi = GameController.IngameState.IngameUi;
         if (ingameUi.FullscreenPanels.Any(x => x.IsVisible)) return;
@@ -391,5 +396,29 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
         }
 
         _settingsUi.Draw(Settings, _debug);
+    }
+
+    public override void OnPluginDestroyForHotReload()
+    {
+        ClearState();
+        base.OnPluginDestroyForHotReload();
+    }
+
+    public override void Dispose()
+    {
+        ClearState();
+        base.Dispose();
+    }
+
+    private void ClearState()
+    {
+        _canRender = false;
+        _tracked.Clear();
+        _seen.Clear();
+        _daemonsByCell.Clear();
+        _wispMemory.Clear();
+        _carried.Clear();
+        _snapshots.Clear();
+        _counts.Reset();
     }
 }

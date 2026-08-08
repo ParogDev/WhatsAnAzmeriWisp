@@ -19,6 +19,7 @@ public sealed class MinimapRenderer
 
         var world = settings.World;
         float size = settings.Minimap.Radius.Value;
+        if (!float.IsFinite(size) || size <= 0) return;
 
         for (int i = 0; i < snapshots.Count; i++)
         {
@@ -27,8 +28,10 @@ public sealed class MinimapRenderer
 
             var color = s.IsHighValue ? settings.Power.HighValueColor.Value : CategoryColor(world, s.Category);
 
+            if (!float.IsFinite(s.GridPos.X) || !float.IsFinite(s.GridPos.Y)) continue;
+
             var c = graphics.GridToMap(s.GridPos, s.GridPos, VisibleSubMap.Large);
-            if (c == Vector2N.Zero) continue;
+            if (!float.IsFinite(c.X) || !float.IsFinite(c.Y)) continue;
 
             graphics.DrawPolyLine(new[] { c + new Vector2(-size, 0), c + new Vector2(size, 0) }, color, 2f);
             graphics.DrawPolyLine(new[] { c + new Vector2(0, -size), c + new Vector2(0, size) }, color, 2f);

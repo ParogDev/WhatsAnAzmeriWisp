@@ -67,7 +67,6 @@ public static class WispClassifier
         rec.PrimaryTier = Tier.Unknown;
         rec.Category = WispCategory.None;
         rec.Rarity = MonsterRarity.White;
-        rec.IsHighValue = false;
 
         rec.WorldPos = e.Pos;
         rec.GridPos = e.GridPos;

@@ -24,13 +24,14 @@ public sealed class WorldOverlay
 
             var color = s.IsHighValue ? settings.Power.HighValueColor.Value : CategoryColor(world, s.Category);
             float radius = CategoryRadius(world, s.Category);
+            if (!IsFinite(s.WorldPos) || !float.IsFinite(radius) || radius <= 0) continue;
 
             graphics.DrawFilledCircleInWorld(s.WorldPos, radius, color);
 
             if (!world.ShowLabel.Value) continue;
 
             var screen = camera.WorldToScreen(s.WorldPos);
-            if (screen == Vector2N.Zero) continue;
+            if (!IsFinite(screen)) continue;
 
             using (graphics.SetTextScale(world.FontSize.Value / 16f))
                 graphics.DrawText(s.Label, new Vector2N(screen.X, screen.Y - 30), color, FontAlign.Center);
@@ -68,5 +69,15 @@ public sealed class WorldOverlay
             case WispCategory.Touched: return w.TouchedRadius.Value;
             default: return w.WispRadius.Value;
         }
+    }
+
+    private static bool IsFinite(Vector2N value)
+    {
+        return float.IsFinite(value.X) && float.IsFinite(value.Y);
+    }
+
+    private static bool IsFinite(System.Numerics.Vector3 value)
+    {
+        return float.IsFinite(value.X) && float.IsFinite(value.Y) && float.IsFinite(value.Z);
     }
 }

@@ -291,9 +291,10 @@ stats.StatDictionary          // Dictionary<GameStat, int>
 
 ### Inventory Helpers
 ```csharp
-// SubInventories -- for complex stash tab types (Currency, Essence, Fragment, etc.)
-var subInvs = stashInventory.SubInventories;  // List<Inventory>
-// Each sub-inventory represents a compartment within a specialty stash tab.
+// Current ExileCore2 contract: the getter resolves the active nested/specialised
+// stash projection internally.
+var items = stashInventory.VisibleInventoryItems;
+// Do not call the removed Inventory.SubInventories property.
 ```
 
 ## Settings Node Types

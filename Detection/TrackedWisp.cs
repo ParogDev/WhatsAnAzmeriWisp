@@ -22,8 +22,6 @@ public sealed class TrackedWisp
     public int EmpowerValue;     // raw empower stat magnitude
     public string EmpowerLabel = "";
 
-    public bool IsHighValue;
-
     public Vector3 WorldPos;
     public Vector2 GridPos;
 
