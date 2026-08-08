@@ -88,3 +88,16 @@ the project.
 | **What's an Azmeri Wisp?** | Azmeri wisp / possession tracker with live empowerment readout |
 
 Built with ExileApiScaffolding (private development workspace)
+
+## Operation logic and status
+
+`Tick` classifies valid entities from PoE2 paths, exact mod prefixes, buffs,
+rarity, and `empower-stats.json`. It tracks free wisps, touched/possessed
+monsters, spirit animals, and the roaming wisp's empowerment, then carries the
+last empowerment onto the nearest possessed host for a short TTL. An immutable
+snapshot feeds the world overlay, large-map marks, and summary panel; render
+does not read components. Area changes/entity removal/hot reload clear state.
+
+Build: **PASS**, classification **CURRENT_WITH_WARNINGS**; the current league's
+paths and empowerment behavior need a live capture. See the [central PoE2 report](../../README.md)
+and [audit](../../../docs/plugins/WhatsAnAzmeriWisp/AUDIT.md).
