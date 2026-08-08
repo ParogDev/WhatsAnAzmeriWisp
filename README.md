@@ -2,7 +2,8 @@
 
 > See which Azmeri wisps and possessed rares are juiced -- and how much -- so you know what's worth killing.
 
-Part of the **WhatsA** plugin family for ExileApi.
+Part of the **WhatsA** plugin family, rebuilt here as a PoE2-only ExileCore2
+plugin. The source does not target the PoE1 ExileApi runtime.
 
 ## What It Does
 
@@ -67,17 +68,10 @@ explicit-map plus baseline-diff fallback.
 
 ## About This Project
 
-These plugins are built with AI-assisted development using Claude Code and the
-ExileApiScaffolding (private development workspace) workspace.
-
-The developer works professionally in cybersecurity and high-risk software --
-AI compensates for a C# knowledge gap specifically, not engineering judgment.
-Plugin data comes from the PoE Wiki and PoEDB data mining.
-
-The focus is on UX: friction points and missing expected features that the
-existing plugin ecosystem doesn't address. Every hour spent developing is an
-hour not spent on league progression, so feedback is the best way to support
-the project.
+This PoE2 port is maintained as a read-only ExileCore2 overlay. Detection data
+is kept in the local `data_manifest.json` and `empower-stats.json` files so that
+path/stat assumptions remain reviewable and can be refreshed independently of
+the renderer.
 
 ## WhatsA Plugin Family
 
@@ -91,8 +85,6 @@ the project.
 | [What's an AI Bridge?](https://github.com/ParogDev/WhatsAnAiBridge) | File-based IPC for AI-assisted plugin development |
 | [What's an Unbound Avatar?](https://github.com/ParogDev/WhatsAnUnboundAvatar) | Auto-activation for Avatar of the Wilds at 100 fury |
 | **What's an Azmeri Wisp?** | Azmeri wisp / possession tracker with live empowerment readout |
-
-Built with ExileApiScaffolding (private development workspace)
 
 ## Operation logic and status
 

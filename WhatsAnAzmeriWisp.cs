@@ -191,6 +191,10 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
             m.Label = w.EmpowerLabel;
             m.GridPos = w.GridPos;
             m.Frame = _frame;
+            // Entity ids are normally short-lived when a wisp hops hosts, but
+            // some client transitions can reuse the same id. A wisp that is
+            // visibly roaming again must be eligible for a fresh carry-over.
+            m.Consumed = false;
         }
 
         // 2. Prune stale memory (wisp long gone without being matched).
