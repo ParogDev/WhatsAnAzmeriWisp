@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "game": "poe2",
+  "validatedAgainstPatch": "0.5.4e",
+  "generatedAtUtc": "2026-06-14",
+  "source": "PoE2 entity-path/stat capture with manually reviewed empowerment rows",
+  "sourceUrls": [
+    "https://www.poe2wiki.net/wiki/Azmeri_spirit",
+    "https://poe2db.tw/us/Azmeri_Spirit",
+    "https://ptr.poedb.tw/us/news"
+  ],
+  "coverage": "Free wisps, possessed/touched hosts, riding daemons, four spirit tiers, and empowerment stat fallback."
+}

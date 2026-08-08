@@ -54,6 +54,8 @@ public sealed class EmpowerStatMap
     private readonly List<Row> _rows = new();
     private readonly HashSet<GameStat> _baseline = new();
 
+    public string DataStatus { get; private set; } = "not loaded";
+
     // Stat keys present on a FRESH (non-powered) roaming wisp -- live-captured baseline seed.
     private static readonly string[] BaselineSeed =
     {
@@ -74,6 +76,10 @@ public sealed class EmpowerStatMap
     {
         _rows.Clear();
         _baseline.Clear();
+
+        var manifest = WispDataManifest.Load(pluginDirectory, out var manifestMessage);
+        DataStatus = manifest == null ? manifestMessage : $"PoE2 {manifest.ValidatedAgainstPatch} data";
+        log?.Invoke(manifestMessage);
 
         foreach (var name in BaselineSeed)
             if (Enum.TryParse<GameStat>(name, out var gs)) _baseline.Add(gs);

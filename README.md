@@ -58,6 +58,11 @@ The **Debug** settings tab shows a live `key: value (type)` tree of every value 
 entity, so a broken memory offset is obvious at a glance. Rendering is split from reads (no
 `GetComponent` in `Render`); the readout panel and overlays draw from an immutable per-frame snapshot.
 
+`data_manifest.json` records the PoE2 patch baseline and source references for the
+empowerment map. The current reviewed baseline is 0.5.4e; missing or malformed
+provenance is reported at startup while detection continues with the safe
+explicit-map plus baseline-diff fallback.
+
 </details>
 
 ## About This Project
