@@ -38,7 +38,7 @@ public static class WispClassifier
     public static DaemonInfo ClassifyDaemon(Entity e, EmpowerStatMap map)
     {
         var info = new DaemonInfo { EmpowerLabel = "Empower" };
-        ParseAnimalTierFromPath(e.Path ?? "", out var animal, out var tier);
+        WispPathParser.ParseAnimalTierFromPath(e.Path ?? "", out var animal, out var tier);
         info.Animal = animal;
         info.Tier = tier;
         info.IsPowered = HasBuff(e.Buffs, PoweredWispBuff);
@@ -81,7 +81,7 @@ public static class WispClassifier
         // Free roaming wisp: TormentedSpiritofthe<Animal><Tier>, no daemon suffix.
         if (path.Contains(TormentedPrefix, StringComparison.Ordinal))
         {
-            ParseAnimalTierFromPath(path, out var animal, out var tier);
+            WispPathParser.ParseAnimalTierFromPath(path, out var animal, out var tier);
             rec.PrimaryAnimal = animal;
             rec.PrimaryTier = tier;
             rec.Category = WispCategory.FreeWisp;
@@ -105,7 +105,7 @@ public static class WispClassifier
         // Summoned spirit-animal minion: Spiritofthe<Animal> (no Tormented prefix, no tier/daemon).
         if (path.Contains(SpiritPrefix, StringComparison.Ordinal))
         {
-            ParseAnimalTierFromPath(path, out var animal, out _);
+            WispPathParser.ParseAnimalTierFromPath(path, out var animal, out _);
             rec.PrimaryAnimal = animal;
             rec.Category = WispCategory.SpiritAnimal;
             return;
@@ -228,40 +228,7 @@ public static class WispClassifier
 
     // Parses TormentedSpiritofthe<Animal><Tier> / Spiritofthe<Animal>, stripping any daemon suffix.
     public static void ParseAnimalTierFromPath(string path, out string animal, out Tier tier)
-    {
-        animal = "";
-        tier = Tier.Unknown;
-        if (string.IsNullOrEmpty(path)) return;
-
-        int i = path.IndexOf(TormentedPrefix, StringComparison.Ordinal);
-        int prefixLen = TormentedPrefix.Length;
-        if (i < 0)
-        {
-            i = path.IndexOf(SpiritPrefix, StringComparison.Ordinal);
-            prefixLen = SpiritPrefix.Length;
-        }
-        if (i < 0) return;
-
-        var tail = path.Substring(i + prefixLen);
-
-        // Trim a trailing "@79" instance id and the daemon suffix if present.
-        int at = tail.IndexOf('@');
-        if (at >= 0) tail = tail.Substring(0, at);
-        if (tail.EndsWith(DaemonSuffix, StringComparison.Ordinal))
-            tail = tail.Substring(0, tail.Length - DaemonSuffix.Length);
-
-        for (int t = 0; t < Tiers.Names.Length; t++)
-        {
-            var name = Tiers.Names[t];
-            if (tail.EndsWith(name, StringComparison.Ordinal))
-            {
-                tier = Tiers.FromName(name);
-                animal = tail.Substring(0, tail.Length - name.Length);
-                return;
-            }
-        }
-        animal = tail;
-    }
+        => WispPathParser.ParseAnimalTierFromPath(path, out animal, out tier);
 
     private static Tier FirstOf(HashSet<Tier> set)
     {
