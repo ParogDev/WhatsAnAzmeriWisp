@@ -195,7 +195,8 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
         {
             var w = kv.Value;
             if (!w.IsValid) continue;
-            w.WorldPos = w.Entity.Pos;
+            var r = w.Render ??= w.Entity.GetComponent<ExileCore2.PoEMemory.Components.Render>();
+            w.WorldPos = r != null ? r.Pos with { Z = r.Pos.Z + r.Bounds.Z } : w.Entity.Pos;   // == Entity.Pos, cheaper
             w.GridPos = w.Entity.GridPos;
         }
     }

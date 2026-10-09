@@ -25,6 +25,8 @@ public sealed class TrackedWisp
     public bool IsHighValue;
 
     public Vector3 WorldPos;
+    // Held for the per-tick position refresh: Render.Pos + Bounds.Z equals Entity.Pos (verified on PoE2) at ~1/7 the cost.
+    public ExileCore2.PoEMemory.Components.Render? Render;
     public Vector2 GridPos;
 
     public string PrimaryAnimal = "";
