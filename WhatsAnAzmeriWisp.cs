@@ -122,6 +122,10 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
         _daemonsByCell.Clear();
 
         var byType = GameController.EntityListWrapper.ValidEntitiesByType;
+        // DistancePlayer is exactly the distance between the entity's and the player's Positioned.GridPosition (verified on
+        // PoE2), but costs ~2.9 us per entity per frame: read the player's grid position once and compare squared distances.
+        var playerGrid = player.GetComponent<ExileCore2.PoEMemory.Components.Positioned>()?.GridPosition;
+        var maxDist2 = maxDist * maxDist;
 
         // Gather once: the path/type tests are cached strings and enums (cheap); validity and distance (component
         // reads) only for entities that can matter. Daemons first, then everything else, as before.
@@ -136,7 +140,14 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
                 if (e == null) continue;
                 bool daemon = WispClassifier.IsDaemon(e);
                 if (!daemon && !WispClassifier.IsRelevant(e)) continue;
-                if (!e.IsValid || e.DistancePlayer > maxDist) continue;
+                if (!e.IsValid) continue;
+                if (playerGrid is { } pg && e.GetComponent<ExileCore2.PoEMemory.Components.Positioned>() is { } ep)
+                {
+                    var g = ep.GridPosition;
+                    float dx = g.X - pg.X, dy = g.Y - pg.Y;
+                    if (dx * dx + dy * dy > maxDist2) continue;
+                }
+                else if (e.DistancePlayer > maxDist) continue;
                 (daemon ? _daemons : _candidates).Add(e);
             }
         }
