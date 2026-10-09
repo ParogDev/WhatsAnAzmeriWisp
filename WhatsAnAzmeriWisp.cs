@@ -46,6 +46,13 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
     private readonly Dictionary<uint, (int Value, string Label)> _carried = new();
     private int _frame;
     private const int WispMemoryTtlFrames = 600;
+
+    // The full entity scan (two passes over every entity type + classification) costs ~3 ms in a busy town, which is
+    // 18% of a frame at 60 fps and most of one at 200+. Categories and empowerment change slowly, so the scan runs at
+    // 20 Hz; positions are refreshed from the tracked entities every tick so drawings stay frame-accurate.
+    private const double ScanIntervalMs = 50;
+    private long _lastScan;
+    private readonly List<Entity> _daemons = new(), _candidates = new();
     private const float CarryMatchMaxDist = 60f;
 
     private readonly List<RenderSnapshot> _snapshots = new(64);
@@ -69,6 +76,7 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
         _wispMemory.Clear();
         _carried.Clear();
         _frame = 0;
+        _lastScan = 0;   // scan right away in the new area
         _snapshots.Clear();
         _counts.Reset();
     }
@@ -97,60 +105,73 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
                     return;
         }
 
+        var now = System.Diagnostics.Stopwatch.GetTimestamp();
+        if (_lastScan != 0 && (now - _lastScan) * 1000.0 / System.Diagnostics.Stopwatch.Frequency < ScanIntervalMs)
+        {
+            RefreshPositions();
+            _frame++;
+            UpdateCarryOver();
+            RebuildSnapshots();
+            _canRender = true;
+            return;
+        }
+        _lastScan = now;
+
         float maxDist = Settings.General.DrawDistance.Value;
         _seen.Clear();
         _daemonsByCell.Clear();
 
         var byType = GameController.EntityListWrapper.ValidEntitiesByType;
 
-        // Pass A: index riding daemons by grid cell.
+        // Gather once: the path/type tests are cached strings and enums (cheap); validity and distance (component
+        // reads) only for entities that can matter. Daemons first, then everything else, as before.
+        _daemons.Clear();
+        _candidates.Clear();
         foreach (var kv in byType)
         {
             var list = kv.Value;
             for (int i = 0; i < list.Count; i++)
             {
                 var e = list[i];
-                if (e == null || !e.IsValid) continue;
-                if (e.DistancePlayer > maxDist) continue;
-                if (!WispClassifier.IsDaemon(e)) continue;
-
-                var info = WispClassifier.ClassifyDaemon(e, _empower);
-                var key = DaemonInfo.CellKey(e.GridPos);
-                if (!_daemonsByCell.TryGetValue(key, out var bucket))
-                {
-                    bucket = new List<DaemonInfo>(2);
-                    _daemonsByCell[key] = bucket;
-                }
-                bucket.Add(info);
+                if (e == null) continue;
+                bool daemon = WispClassifier.IsDaemon(e);
+                if (!daemon && !WispClassifier.IsRelevant(e)) continue;
+                if (!e.IsValid || e.DistancePlayer > maxDist) continue;
+                (daemon ? _daemons : _candidates).Add(e);
             }
         }
 
-        // Pass B: classify hosts / free wisps / spirit animals (daemons already consumed).
-        foreach (var kv in byType)
+        // Pass A: index riding daemons by grid cell.
+        for (int i = 0; i < _daemons.Count; i++)
         {
-            var list = kv.Value;
-            for (int i = 0; i < list.Count; i++)
+            var e = _daemons[i];
+            var info = WispClassifier.ClassifyDaemon(e, _empower);
+            var key = DaemonInfo.CellKey(e.GridPos);
+            if (!_daemonsByCell.TryGetValue(key, out var bucket))
             {
-                var e = list[i];
-                if (e == null || !e.IsValid) continue;
-                if (e.DistancePlayer > maxDist) continue;
-                if (WispClassifier.IsDaemon(e)) continue;
-                if (!WispClassifier.IsRelevant(e)) continue;
-
-                if (!_tracked.TryGetValue(e.Id, out var rec))
-                {
-                    rec = new TrackedWisp(e);
-                    _tracked[e.Id] = rec;
-                }
-
-                WispClassifier.Populate(rec, e, _empower, _daemonsByCell);
-                if (rec.Category == WispCategory.None)
-                {
-                    _tracked.Remove(e.Id);
-                    continue;
-                }
-                _seen.Add(e.Id);
+                bucket = new List<DaemonInfo>(2);
+                _daemonsByCell[key] = bucket;
             }
+            bucket.Add(info);
+        }
+
+        // Pass B: classify hosts / free wisps / spirit animals (daemons already consumed).
+        for (int i = 0; i < _candidates.Count; i++)
+        {
+            var e = _candidates[i];
+            if (!_tracked.TryGetValue(e.Id, out var rec))
+            {
+                rec = new TrackedWisp(e);
+                _tracked[e.Id] = rec;
+            }
+
+            WispClassifier.Populate(rec, e, _empower, _daemonsByCell);
+            if (rec.Category == WispCategory.None)
+            {
+                _tracked.Remove(e.Id);
+                continue;
+            }
+            _seen.Add(e.Id);
         }
 
         // Prune anything not seen this tick (host hop, left range, died).
@@ -165,6 +186,18 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
         UpdateCarryOver();
         RebuildSnapshots();
         _canRender = true;
+    }
+
+    // Between scans: move tracked records with their entities (cheap: a handful of cached reads).
+    private void RefreshPositions()
+    {
+        foreach (var kv in _tracked)
+        {
+            var w = kv.Value;
+            if (!w.IsValid) continue;
+            w.WorldPos = w.Entity.Pos;
+            w.GridPos = w.Entity.GridPos;
+        }
     }
 
     // Remembers roaming wisp empowerment and attributes it to newly possessed rares.

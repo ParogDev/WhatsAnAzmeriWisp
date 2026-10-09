@@ -35,7 +35,7 @@ is mostly accurate, but note these EC2 differences that this plugin actually use
 
 | File | Purpose |
 |------|---------|
-| `WhatsAnAzmeriWisp.cs` | Main plugin -- two-pass Tick (index daemons, then classify), carry-over, snapshots, lifecycle, DrawSettings |
+| `WhatsAnAzmeriWisp.cs` | Main plugin -- Tick: a 20 Hz scan (one gather pass on cached path/type, then index daemons, then classify) and per-tick position refresh; carry-over, snapshots, lifecycle, DrawSettings |
 | `WhatsAnAzmeriWispSettings.cs` | ISettings + [Submenu] groups (General/World/Minimap/Panel/Power) |
 | `WhatsAnAzmeriWispSettingsUi.cs` | Tabbed ImGui settings UI (Overlay/Panel/Power/Debug), wisp-teal branding |
 | `empower-stats.json` | Per-animal/tier empowerment stat map (explicit overrides; auto-detect is the fallback) |
