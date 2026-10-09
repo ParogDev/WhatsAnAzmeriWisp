@@ -119,7 +119,7 @@ public static class WispClassifier
         if (mods == null || mods.Count == 0)
         {
             // Touched can also be flagged by a stat with no mod parsed yet.
-            if (StatFlag(e, "TouchedByPrimalSpirit"))
+            if (TouchedStatThrottled(e))
             {
                 rec.Rarity = omp.Rarity;
                 rec.Category = WispCategory.Touched;
@@ -285,6 +285,24 @@ public static class WispClassifier
         for (int i = 0; i < list.Count; i++)
             if (list[i]?.Name == name) n++;
         return n;
+    }
+
+    // Entity.Stats costs ~25 us per entity the first time each frame, and every mod-less host (every white monster)
+    // reaches this check on every scan. The touched-before-its-mod-parses state is transient, so re-check each entity
+    // at most every 500 ms: detection is delayed by at most half a second, at ~1/10 of the cost.
+    private static readonly Dictionary<long, long> NextTouchedCheck = new();
+    private static readonly HashSet<long> TouchedSeen = new();
+
+    public static void ResetThrottles() { NextTouchedCheck.Clear(); TouchedSeen.Clear(); }
+
+    private static bool TouchedStatThrottled(Entity e)
+    {
+        var now = System.Environment.TickCount64;
+        if (NextTouchedCheck.TryGetValue(e.Id, out var due) && now < due) return TouchedSeen.Contains(e.Id);
+        NextTouchedCheck[e.Id] = now + 500;
+        var touched = StatFlag(e, "TouchedByPrimalSpirit");
+        if (touched) TouchedSeen.Add(e.Id); else TouchedSeen.Remove(e.Id);
+        return touched;
     }
 
     private static bool StatFlag(Entity e, string statName)
