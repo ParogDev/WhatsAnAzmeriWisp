@@ -77,6 +77,7 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
         _carried.Clear();
         _frame = 0;
         _lastScan = 0;   // scan right away in the new area
+        WispClassifier.ResetThrottles();
         _snapshots.Clear();
         _counts.Reset();
     }
