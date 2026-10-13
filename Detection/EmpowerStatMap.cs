@@ -79,6 +79,7 @@ public sealed class EmpowerStatMap
             if (Enum.TryParse<GameStat>(name, out var gs)) _baseline.Add(gs);
 
         List<EmpowerStatEntry>? entries = null;
+        var readFailed = false;
         try
         {
             var path = Path.Combine(pluginDirectory ?? "", "empower-stats.json");
@@ -90,12 +91,13 @@ public sealed class EmpowerStatMap
         }
         catch (Exception ex)
         {
-            log?.Invoke("Azmeri Wisp: failed to read empower-stats.json: " + ex.Message);
+            log?.Invoke("Azmeri Wisp: failed to read empower-stats.json, using the built-in Owl row: " + ex.Message);
+            readFailed = true;
         }
 
         if (entries == null || entries.Count == 0)
         {
-            log?.Invoke("Azmeri Wisp: empower-stats.json missing, unreadable or empty in " + (pluginDirectory ?? "?")
+            if (!readFailed) log?.Invoke("Azmeri Wisp: empower-stats.json missing, unreadable or empty in " + (pluginDirectory ?? "?")
                 + ": using the built-in Owl row (auto-detect still covers other animals).");
             entries = new List<EmpowerStatEntry>
             {
