@@ -95,6 +95,8 @@ public sealed class EmpowerStatMap
 
         if (entries == null || entries.Count == 0)
         {
+            log?.Invoke("Azmeri Wisp: empower-stats.json missing, unreadable or empty in " + (pluginDirectory ?? "?")
+                + ": using the built-in Owl row (auto-detect still covers other animals).");
             entries = new List<EmpowerStatEntry>
             {
                 new EmpowerStatEntry { Animal = "Owl", Tier = "Primal", StatName = "LightningDamagePctFromRage", Display = "Empower" },
@@ -102,6 +104,7 @@ public sealed class EmpowerStatMap
         }
 
         TotalCount = entries.Count;
+        List<string>? unknown = null;
         foreach (var e in entries)
         {
             if (e == null || string.IsNullOrWhiteSpace(e.StatName)) continue;
@@ -112,11 +115,13 @@ public sealed class EmpowerStatMap
             }
             else
             {
-                log?.Invoke("Azmeri Wisp: empower stat '" + e.StatName + "' is not a GameStat member, skipping.");
+                (unknown ??= new List<string>()).Add(e.StatName);
             }
         }
-        // No success line: log is for failures only (the plugin shows them as errors); ResolvedCount / TotalCount
-        // hold the row counts.
+        // One line for all unknown stats (a patch that renames several would otherwise stack error lines).
+        if (unknown != null)
+            log?.Invoke("Azmeri Wisp: empower-stats.json rows skipped, not GameStat members: " + string.Join(", ", unknown));
+        // No success line: log is for failures only (the plugin shows them as errors).
     }
 
     // Learn the baseline stat keys from a fresh (non-powered) roaming wisp.
