@@ -5,18 +5,23 @@ using Color = System.Drawing.Color;
 
 namespace WhatsAnAzmeriWisp;
 
+// Drawn by SettingsMenu (see SettingsMenu.cs): [Menu] gives the label and the description, [MenuTab] merges
+// submenus onto one tab, [MenuUnit] suffixes a slider's readout.
 public class WhatsAnAzmeriWispSettings : ISettings
 {
     [Menu("Enable", "Turn the whole plugin on or off")]
     public ToggleNode Enable { get; set; } = new(true);
 
     [Menu("General", "Settings shared by all overlays")]
+    [MenuTab("Overlay")]
     public GeneralSettings General { get; set; } = new();
 
     [Menu("World Overlay", "Circles and labels on wisps, possessed and touched monsters and spirit animals")]
+    [MenuTab("Overlay")]
     public WorldSettings World { get; set; } = new();
 
     [Menu("Map Marks", "Crosses on the large map for tracked entities")]
+    [MenuTab("Overlay")]
     public MinimapSettings Minimap { get; set; } = new();
 
     [Menu("Panel", "On-screen readout listing tracked wisps and their empowerment")]
@@ -30,6 +35,7 @@ public class WhatsAnAzmeriWispSettings : ISettings
 public class GeneralSettings
 {
     [Menu("Draw Distance", "Track and draw entities within this distance of the player, in grid units (20-400)")]
+    [MenuUnit("grid")]
     public RangeNode<int> DrawDistance { get; set; } = new(120, 20, 400);
 }
 
@@ -64,18 +70,22 @@ public class WorldSettings
     public ColorNode SpiritAnimalColor { get; set; } = new(Color.FromArgb(140, 180, 180, 180));
 
     [Menu("Possessed Radius", "Filled circle radius for possessed monsters, in world units (20-200)")]
+    [MenuUnit("px")]
     public RangeNode<int> PossessedRadius { get; set; } = new(70, 20, 200);
 
     [Menu("Touched Radius", "Filled circle radius for touched monsters, in world units (20-200)")]
+    [MenuUnit("px")]
     public RangeNode<int> TouchedRadius { get; set; } = new(50, 20, 200);
 
     [Menu("Wisp Radius", "Filled circle radius for wisps and spirit animals, in world units (20-200)")]
+    [MenuUnit("px")]
     public RangeNode<int> WispRadius { get; set; } = new(50, 20, 200);
 
     [Menu("Text Labels", "Draw the category/animal label above entities")]
     public ToggleNode ShowLabel { get; set; } = new(true);
 
     [Menu("Label Font Size", "Label text size in px (8-32, 16 = normal)")]
+    [MenuUnit("px")]
     public RangeNode<int> FontSize { get; set; } = new(16, 8, 32);
 }
 
@@ -86,6 +96,7 @@ public class MinimapSettings
     public ToggleNode Enabled { get; set; } = new(true);
 
     [Menu("Mark Size", "Half-length of each cross arm, in px (2-30)")]
+    [MenuUnit("px")]
     public RangeNode<float> Radius { get; set; } = new(8f, 2f, 30f);
 }
 
@@ -96,12 +107,15 @@ public class PanelSettings
     public ToggleNode Enabled { get; set; } = new(true);
 
     [Menu("Position X", "Left edge of the panel, in screen px")]
+    [MenuUnit("px")]
     public RangeNode<int> X { get; set; } = new(500, 0, 3840);
 
     [Menu("Position Y", "Top edge of the panel, in screen px")]
+    [MenuUnit("px")]
     public RangeNode<int> Y { get; set; } = new(140, 0, 2160);
 
     [Menu("Scale", "Panel text and size multiplier (0.6-2.0)")]
+    [MenuUnit("x")]
     public RangeNode<float> Scale { get; set; } = new(1f, 0.6f, 2f);
 
     [Menu("Show Counts", "Header line with per-category counts")]
@@ -114,6 +128,7 @@ public class PanelSettings
     public ToggleNode ShowEmpower { get; set; } = new(true);
 
     [Menu("Max Rows", "Most entity rows the list shows (1-40)")]
+    [MenuUnit("rows")]
     public RangeNode<int> MaxRows { get; set; } = new(12, 1, 40);
 }
 
