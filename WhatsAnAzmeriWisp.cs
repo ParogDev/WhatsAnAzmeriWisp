@@ -64,7 +64,7 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
     public override bool Initialise()
     {
         Name = "Whats An Azmeri Wisp";
-        _empower.Load(DirectoryFullName, msg => LogMessage(msg, 5));
+        _empower.Load(DirectoryFullName, msg => LogError(msg, 10));   // only on failure: a real fault, shown once
         return true;
     }
 
@@ -276,8 +276,8 @@ public class WhatsAnAzmeriWisp : BaseSettingsPlugin<WhatsAnAzmeriWispSettings>
             {
                 _carried[kv.Key] = (best.EmpowerValue, best.Label);
                 best.Consumed = true;
-                LogMessage("Azmeri Wisp: carried empowerment " + best.EmpowerValue + " (" + best.Animal
-                    + ") to possessed host " + kv.Key + " dist " + (int)bestDist, 5);
+                // No on-screen line here: it fired on every possession and crowded the HUD's top-left text while
+                // playing. The carried value is drawn on the host itself.
             }
         }
     }

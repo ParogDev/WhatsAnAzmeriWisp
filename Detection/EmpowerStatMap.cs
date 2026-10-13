@@ -79,6 +79,7 @@ public sealed class EmpowerStatMap
             if (Enum.TryParse<GameStat>(name, out var gs)) _baseline.Add(gs);
 
         List<EmpowerStatEntry>? entries = null;
+        var readFailed = false;
         try
         {
             var path = Path.Combine(pluginDirectory ?? "", "empower-stats.json");
@@ -90,11 +91,14 @@ public sealed class EmpowerStatMap
         }
         catch (Exception ex)
         {
-            log?.Invoke("Azmeri Wisp: failed to read empower-stats.json: " + ex.Message);
+            log?.Invoke("Azmeri Wisp: failed to read empower-stats.json, using the built-in Owl row: " + ex.Message);
+            readFailed = true;
         }
 
         if (entries == null || entries.Count == 0)
         {
+            if (!readFailed) log?.Invoke("Azmeri Wisp: empower-stats.json missing, unreadable or empty in " + (pluginDirectory ?? "?")
+                + ": using the built-in Owl row (auto-detect still covers other animals).");
             entries = new List<EmpowerStatEntry>
             {
                 new EmpowerStatEntry { Animal = "Owl", Tier = "Primal", StatName = "LightningDamagePctFromRage", Display = "Empower" },
@@ -102,6 +106,7 @@ public sealed class EmpowerStatMap
         }
 
         TotalCount = entries.Count;
+        List<string>? unknown = null;
         foreach (var e in entries)
         {
             if (e == null || string.IsNullOrWhiteSpace(e.StatName)) continue;
@@ -112,12 +117,13 @@ public sealed class EmpowerStatMap
             }
             else
             {
-                log?.Invoke("Azmeri Wisp: empower stat '" + e.StatName + "' is not a GameStat member, skipping.");
+                (unknown ??= new List<string>()).Add(e.StatName);
             }
         }
-
-        log?.Invoke("Azmeri Wisp: empower map " + _rows.Count + "/" + TotalCount
-            + " explicit rows, " + _baseline.Count + " baseline stats (auto-detect on for other animals).");
+        // One line for all unknown stats (a patch that renames several would otherwise stack error lines).
+        if (unknown != null)
+            log?.Invoke("Azmeri Wisp: empower-stats.json rows skipped, not GameStat members: " + string.Join(", ", unknown));
+        // No success line: log is for failures only (the plugin shows them as errors).
     }
 
     // Learn the baseline stat keys from a fresh (non-powered) roaming wisp.
