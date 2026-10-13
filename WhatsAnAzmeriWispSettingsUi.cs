@@ -36,7 +36,7 @@ public sealed class WhatsAnAzmeriWispSettingsUi
     private void DrawEmpowermentIntro()
     {
         ImGui.PushTextWrapPos(0f);
-        ImGui.TextColored(Muted, "A wisp's empowerment rises as you kill spirit-touched monsters near it while "
+        Text(Muted, "A wisp's empowerment rises as you kill spirit-touched monsters near it while "
             + "it roams. When it possesses a rare, that value is carried onto the possessed monster "
             + "(matched by the nearest wisp at the moment of possession). The value is read only while "
             + "the wisp roams; possessed monsters show the carried value.");
@@ -48,17 +48,17 @@ public sealed class WhatsAnAzmeriWispSettingsUi
     {
         var debug = _debug;
         int n = debug?.Count ?? 0;
-        ImGui.TextColored(Accent, "Live read state");
+        Text(Accent, "Live read state");
         ImGui.SameLine();
-        ImGui.TextColored(Muted, "tracked entities: " + n);
-        ImGui.TextColored(Muted, "If a value below looks like garbage, that read/offset is broken.");
+        Text(Muted, "tracked entities: " + n);
+        Text(Muted, "If a value below looks like garbage, that read/offset is broken.");
         ImGui.Spacing();
         ImGui.Separator();
 
         if (n == 0)
         {
             ImGui.Spacing();
-            ImGui.TextColored(Muted, "(nothing in range -- walk into Azmeri content)");
+            Text(Muted, "(nothing in range -- walk into Azmeri content)");
             return;
         }
 
@@ -84,6 +84,9 @@ public sealed class WhatsAnAzmeriWispSettingsUi
         }
     }
 
+    // text taken as-is (ImGui's Text* calls are printf-style and would eat a % in a value)
+    private static void Text(Vector4 color, string text) => SettingsMenu.Text(color, text);
+
     private static string Animal(DebugEntry d)
     {
         if (string.IsNullOrEmpty(d.Animal)) return "";
@@ -92,10 +95,10 @@ public sealed class WhatsAnAzmeriWispSettingsUi
 
     private static void KvLine(string key, string value, string type, bool highlight = false)
     {
-        ImGui.TextColored(Muted, "    " + key + ":");
+        Text(Muted, "    " + key + ":");
         ImGui.SameLine(220);
-        ImGui.TextColored(highlight ? Good : LabelCol, value);
+        Text(highlight ? Good : LabelCol, value);
         ImGui.SameLine();
-        ImGui.TextColored(TypeCol, "(" + type + ")");
+        Text(TypeCol, "(" + type + ")");
     }
 }
