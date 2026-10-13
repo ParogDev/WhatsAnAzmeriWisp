@@ -8,9 +8,9 @@ Classifies nearby entities every Tick into Possessed rares/uniques, spirit-Touch
 free-roaming Wisps, and summoned Spirit Animals, and draws color-coded world circles + minimap
 marks. It reads a roaming wisp's empowerment (the value that scales with touched-monster kills) and
 carries that value onto the rare the wisp possesses, so the player can tell juiced targets from
-worthless ones. Empowerment and counts are shown in a branded on-screen readout panel; a tabbed
-settings UI (Overlay / Panel / Power / Debug) exposes all options plus a live key/value/type debug
-tree of what is being read.
+worthless ones. Empowerment and counts are shown in a branded on-screen readout panel; the settings
+panel (tabs Overlay / Panel / Empowerment / Debug) is drawn by `SettingsMenu.cs` from the `[Menu]`
+attributes, plus a live key/value/type debug tree of what is being read.
 
 ## ExileCore2 vs the reference below
 
@@ -36,8 +36,9 @@ is mostly accurate, but note these EC2 differences that this plugin actually use
 | File | Purpose |
 |------|---------|
 | `WhatsAnAzmeriWisp.cs` | Main plugin -- Tick: a 20 Hz scan (one gather pass on cached path/type, then index daemons, then classify) and per-tick position refresh; carry-over, snapshots, lifecycle, DrawSettings |
-| `WhatsAnAzmeriWispSettings.cs` | ISettings + [Submenu] groups (General/World/Minimap/Panel/Power) |
-| `WhatsAnAzmeriWispSettingsUi.cs` | Tabbed ImGui settings UI (Overlay/Panel/Power/Debug), wisp-teal branding |
+| `WhatsAnAzmeriWispSettings.cs` | ISettings + [Submenu] groups (General/World/Minimap/Panel/Power); `[Menu]` labels and tooltips are what the panel shows, `[MenuTab("Overlay")]` merges General/World/Minimap onto one tab, `[MenuUnit]` suffixes sliders |
+| `SettingsMenu.cs` | The [Menu]-driven settings renderer (per-plugin copy of the scaffolding's `new-plugin/templates/SettingsMenu.template.cs`, `__HUD__` = ExileCore2): tabs, cards, rows, filter, right-click reset, footer with draw cost |
+| `WhatsAnAzmeriWispSettingsUi.cs` | Builds the `SettingsMenu` (wisp-teal accent) and adds what it can't know: the Empowerment intro text and the Debug tab (live key/value/type tree) |
 | `empower-stats.json` | Per-animal/tier empowerment stat map (explicit overrides; auto-detect is the fallback) |
 | `Detection/WispCategory.cs` | enum None/Possessed/Touched/FreeWisp/SpiritAnimal |
 | `Detection/Tier.cs` | Tier enum + tier-suffix list + AttrToTier (Dex->Vivid, Int->Primal, Str->Wild) |
