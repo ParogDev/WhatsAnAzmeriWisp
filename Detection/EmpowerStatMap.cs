@@ -115,9 +115,8 @@ public sealed class EmpowerStatMap
                 log?.Invoke("Azmeri Wisp: empower stat '" + e.StatName + "' is not a GameStat member, skipping.");
             }
         }
-
-        log?.Invoke("Azmeri Wisp: empower map " + _rows.Count + "/" + TotalCount
-            + " explicit rows, " + _baseline.Count + " baseline stats (auto-detect on for other animals).");
+        // No success line: log is for failures only (the plugin shows them as errors); ResolvedCount / TotalCount
+        // hold the row counts.
     }
 
     // Learn the baseline stat keys from a fresh (non-powered) roaming wisp.
